@@ -1,0 +1,81 @@
+{
+  "checkedDate": "2026-10-30",
+  "repository": "aimummatv/TradeFlow-v3",
+  "intendedVisibility": "private",
+  "trackedFilesChecked": 69,
+  "localDocumentationLinksChecked": 26,
+  "excluded": [
+    "live business data and documents",
+    "local databases and backups",
+    "node_modules",
+    "Python virtual environment",
+    "personal logs and old screenshots"
+  ],
+  "credentialPatternsFound": 0,
+  "regressionTests": {
+    "passed": 24,
+    "failed": 0
+  },
+  "browserChecks": {
+    "passed": 10,
+    "failed": 0
+  },
+  "images": [
+    {
+      "path": "docs/screenshots/01-orders-pipeline.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 462509,
+      "sha256": "a09172b828b86bb154ba1b293ca6b76fa320d01c88a641396fedb4b15cfbc769"
+    },
+    {
+      "path": "docs/screenshots/02-finance-cockpit.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 379537,
+      "sha256": "2c6b1092850f263b5033c404220b76d0f695ac1fca29efebc7de509a78b84f79"
+    },
+    {
+      "path": "docs/screenshots/03-partner-directory.png",
+      "width": 1920,
+      "height": 1200,
+      "bytes": 280905,
+      "sha256": "c553ee4e0b8b444e063ea023ac918078d36c057a18442c8fbb65be55f7ae1522"
+    },
+    {
+      "path": "docs/screenshots/04-partner-workspace.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 293419,
+      "sha256": "22f87549506b4ab652d3ebadb0b5ef4bb5601d6e95889cd955d73c025344dc17"
+    },
+    {
+      "path": "docs/screenshots/05-invoice-studio.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 415171,
+      "sha256": "517a68da0568e009924088903cedd9223b641e4ffd5043230ceb99f9c3ff9070"
+    },
+    {
+      "path": "docs/screenshots/06-profit-calculator.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 548887,
+      "sha256": "a4d490c442ac0f08f2e1fd55b9598e02bb3135ecc2954b5be0350ba77786407d"
+    },
+    {
+      "path": "docs/screenshots/07-daily-diary.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 407433,
+      "sha256": "836cfa8283e99e2680370cdd15cd4c697fa761ad076cff978e5954438ed1d1a3"
+    },
+    {
+      "path": "docs/screenshots/08-mobile-capture.png",
+      "width": 780,
+      "height": 1688,
+      "bytes": 221422,
+      "sha256": "e14c204e016769fe0216801d4521d167a71f5d47023426b1106a966e3e6e7ab9"
+    }
+  ]
+}

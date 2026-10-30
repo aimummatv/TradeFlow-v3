@@ -1,0 +1,3 @@
+@echo off
+echo Opening TradeFlow Master Excel Database in Excel...
+start "" "%~dp0..\data\TradeFlow_Master_Database.xlsx"

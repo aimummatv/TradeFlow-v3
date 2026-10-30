@@ -1,0 +1,3 @@
+@echo off
+echo Opening TradeFlow Bills & Orders Vault in Windows File Explorer...
+start "" explorer.exe "%~dp0..\data\orders"

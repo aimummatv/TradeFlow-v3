@@ -1,0 +1,32 @@
+# Live business data, documents, backups, device pairing and generated seed mirrors
+/data/
+
+# Rebuilt dependencies and local environments
+/node_modules/
+/rapidocr/.venv/
+__pycache__/
+*.py[cod]
+
+# Credentials and machine settings
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+
+# Generated diagnostics and scratch files
+*.log
+*.tmp
+*.db
+*.db-wal
+*.db-shm
+.cache/
+coverage/
+test-results/
+.tradeflow-tests/
+~$*
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Curated docs/screenshots/ images are intentionally tracked.

@@ -1,0 +1,15 @@
+{
+  "captured": "2026-10-30",
+  "dataset": "Fictional demo data only",
+  "screenshots": [
+    "01-orders-pipeline",
+    "02-finance-cockpit",
+    "03-partner-directory",
+    "04-partner-workspace",
+    "05-invoice-studio",
+    "06-profit-calculator",
+    "07-daily-diary",
+    "08-mobile-capture"
+  ],
+  "pageErrors": []
+}

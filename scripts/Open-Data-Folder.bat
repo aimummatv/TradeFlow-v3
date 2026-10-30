@@ -1,0 +1,3 @@
+@echo off
+echo Opening TradeFlow Master Data & Vault Folder in Windows File Explorer...
+start "" explorer.exe "%~dp0..\data"

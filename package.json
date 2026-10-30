@@ -1,0 +1,31 @@
+{
+  "name": "tradeflow",
+  "version": "3.0.0",
+  "description": "Magic Roots TradeFlow - Enterprise Multi-Party Trade & Commercial Intelligence ERP",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/release.test.js",
+    "test:security": "node --test --test-name-pattern=\"security\" tests/release.test.js",
+    "test:browser": "node tests/browser-smoke.js",
+    "audit:dependencies": "npm audit",
+    "vendor:build": "node scripts/build-vendor.js",
+    "test:ocr": "node scripts/run-ocr-tests.js",
+    "screenshots": "node scripts/capture-screenshots.js"
+  },
+  "dependencies": {
+    "xlsx": "file:vendor/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "dompurify": "3.4.17",
+    "esbuild": "0.28.2",
+    "html2pdf.js": "0.14.0",
+    "lucide": "0.468.0",
+    "pdfjs-dist": "6.4.299",
+    "puppeteer-core": "25.16.0",
+    "qrcode-generator": "2.0.4"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

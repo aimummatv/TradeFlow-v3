@@ -1,0 +1,3 @@
+@echo off
+echo Opening TradeFlow in default browser...
+start http://localhost:3000

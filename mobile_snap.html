@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>TradeFlow | Mobile Camera Snap</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TradeFlow Snap">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#020617">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2310b981'/%3E%3Ccircle cx='16' cy='16' r='6' stroke='white' stroke-width='2.5' fill='none'/%3E%3Crect x='13' y='8' width='6' height='2' rx='1' fill='white'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230f172a'/%3E%3Crect x='15' y='15' width='150' height='150' rx='32' fill='%23059669'/%3E%3Ccircle cx='90' cy='90' r='36' stroke='white' stroke-width='14' fill='none'/%3E%3Crect x='72' y='42' width='36' height='12' rx='6' fill='white'/%3E%3C/svg%3E">
+  <script src="/vendor/tailwind.js"></script>
+  <script src="/vendor/lucide.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .btn-tactile {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-tactile:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col bg-slate-950 text-slate-100 select-none">
+
+  <!-- Compact Modern Header -->
+  <header class="px-3.5 py-2 bg-slate-900/90 border-b border-slate-800/80 flex items-center justify-between shrink-0 backdrop-blur-md z-20">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white text-sm shadow-md shadow-emerald-500/20 shrink-0">
+        🌿
+      </div>
+      <div class="leading-tight">
+        <h1 class="text-xs font-black text-white tracking-tight">TradeFlow Snap</h1>
+        <p class="text-[10px] text-emerald-400 font-semibold">Desktop Camera Intake</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-800/90 border border-slate-700/80 text-[10px] font-mono">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span id="session-badge" class="font-extrabold text-slate-200">PAIRING...</span>
+    </div>
+  </header>
+
+  <!-- Main Viewport: Uses full height between header and bottom without scrolling -->
+  <main class="flex-1 min-h-0 flex flex-col max-w-lg mx-auto w-full p-2.5 gap-2 overflow-hidden">
+
+    <!-- Hidden native file inputs -->
+    <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
+    <input type="file" id="gallery-input" accept="image/*" class="hidden">
+
+    <!-- Error Banner -->
+    <div id="error-banner" class="hidden px-3 py-1.5 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-200 text-xs flex items-center gap-2 shrink-0">
+      <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 shrink-0"></i>
+      <span id="error-text" class="truncate"></span>
+    </div>
+
+    <!-- INITIAL CAPTURE ZONE (Full Viewfinder before photo is taken) -->
+    <div id="capture-zone" class="flex-1 min-h-0 w-full rounded-2xl border border-slate-800/80 bg-slate-900/50 flex flex-col items-center justify-center p-5 text-center space-y-4 relative overflow-hidden shadow-2xl">
+      <!-- Decorative Viewfinder Corner Brackets -->
+      <div class="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-emerald-500/50 rounded-tl pointer-events-none"></div>
+      <div class="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-emerald-500/50 rounded-tr pointer-events-none"></div>
+      <div class="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-emerald-500/50 rounded-bl pointer-events-none"></div>
+      <div class="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-emerald-500/50 rounded-br pointer-events-none"></div>
+
+      <div class="relative">
+        <div class="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
+          <i data-lucide="camera" class="w-10 h-10"></i>
+        </div>
+        <span class="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[9px] font-black tracking-wider uppercase shadow">Auto</span>
+      </div>
+
+      <div class="space-y-1">
+        <h2 class="text-base font-black text-white">Snap Commercial Slip</h2>
+        <p class="text-xs text-slate-400 max-w-xs leading-relaxed">
+          Capture bank deposit slip, NEFT summary, transport bilty, or invoice.
+        </p>
+      </div>
+
+      <div class="w-full max-w-xs space-y-2 pt-1">
+        <button id="btn-camera" type="button" class="btn-tactile w-full py-3 px-4 rounded-xl font-extrabold text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2">
+          <i data-lucide="camera" class="w-4 h-4"></i>
+          <span>Open Camera</span>
+        </button>
+
+        <button id="btn-gallery" type="button" class="btn-tactile w-full py-2.5 px-4 rounded-xl font-semibold text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 flex items-center justify-center gap-2">
+          <i data-lucide="image" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span>Choose from Gallery</span>
+        </button>
+      </div>
+
+      <div class="text-[10px] text-slate-500 font-mono pt-1">
+        ⚡ Instant WiFi Sync • Auto-Compressed for RapidOCR
+      </div>
+    </div>
+
+    <!-- PREVIEW & CONFIRM ZONE (Maximized viewport height, zero scroll) -->
+    <div id="preview-zone" class="hidden flex-1 min-h-0 flex flex-col gap-2 w-full overflow-hidden">
+      
+      <!-- Maximized Document Preview Canvas Frame -->
+      <div class="relative flex-1 min-h-0 w-full rounded-2xl overflow-hidden border border-slate-800/90 bg-slate-950 flex items-center justify-center shadow-2xl">
+        <img id="preview-img" src="" alt="Captured slip" class="w-full h-full object-contain select-none">
+        
+        <!-- Floating Top Quick Action Buttons: Rotate, Crop, Retake -->
+        <div class="absolute top-2 right-2 flex items-center gap-1.5 z-10">
+          <button id="btn-rotate" type="button" class="btn-tactile px-2.5 py-1 rounded-xl bg-slate-950/90 backdrop-blur-md border border-slate-700/80 text-cyan-300 text-[11px] font-bold flex items-center gap-1 shadow-lg hover:bg-slate-900 active:scale-95" title="Rotate 90° Clockwise">
+            <i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span>Rotate</span>
+          </button>
+          <button id="btn-crop-slip" type="button" class="btn-tactile px-2.5 py-1 rounded-xl bg-slate-950/90 backdrop-blur-md border border-slate-700/80 text-emerald-300 text-[11px] font-bold flex items-center gap-1 shadow-lg hover:bg-slate-900 active:scale-95" title="Crop Slip Area">
+            <i data-lucide="crop" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Crop</span>
+          </button>
+          <button id="btn-retake" type="button" class="btn-tactile px-2.5 py-1 rounded-xl bg-slate-950/90 backdrop-blur-md border border-slate-700/80 text-amber-300 text-[11px] font-bold flex items-center gap-1 shadow-lg hover:bg-slate-900 active:scale-95" title="Retake Photo">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Retake</span>
+          </button>
+        </div>
+
+        <!-- Floating Bottom File Info Badge -->
+        <div class="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-slate-950/85 backdrop-blur-md border border-slate-800 text-[10px] text-slate-300 font-mono flex items-center gap-1.5 shadow-md z-10">
+          <span id="preview-filename" class="font-bold text-white truncate max-w-[120px]">slip.jpg</span>
+          <span class="text-slate-600">•</span>
+          <span id="preview-size" class="text-emerald-400 font-extrabold truncate max-w-[140px]">0 KB</span>
+        </div>
+      </div>
+
+      <!-- Bottom Control Panel: Compact & Docked (No scrolling needed) -->
+      <div class="shrink-0 space-y-1.5 p-2 rounded-2xl bg-slate-900/90 border border-slate-800/80 backdrop-blur-md">
+        <!-- Document Category Chips -->
+        <div class="grid grid-cols-4 gap-1.5 text-xs">
+          <button type="button" data-tag="bank_slip" class="tag-btn py-1.5 px-2 rounded-xl border border-emerald-500 bg-emerald-500/20 text-emerald-300 font-bold flex items-center justify-center gap-1 shadow-xs">
+            <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+            <span>Slip</span>
+          </button>
+          <button type="button" data-tag="bilty" class="tag-btn py-1.5 px-2 rounded-xl border border-slate-700/80 bg-slate-900 text-slate-300 font-semibold flex items-center justify-center gap-1">
+            <i data-lucide="truck" class="w-3.5 h-3.5"></i>
+            <span>Bilty</span>
+          </button>
+          <button type="button" data-tag="invoice" class="tag-btn py-1.5 px-2 rounded-xl border border-slate-700/80 bg-slate-900 text-slate-300 font-semibold flex items-center justify-center gap-1">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span>Invoice</span>
+          </button>
+          <button type="button" data-tag="other" class="tag-btn py-1.5 px-2 rounded-xl border border-slate-700/80 bg-slate-900 text-slate-300 font-semibold flex items-center justify-center gap-1">
+            <i data-lucide="package" class="w-3.5 h-3.5"></i>
+            <span>Other</span>
+          </button>
+        </div>
+
+        <!-- Compact Optional Remark Input -->
+        <div>
+          <input id="upload-note" type="text" placeholder="Optional remark (e.g. Sunil Kumar ₹25k)" class="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-950/90 border border-slate-700/80 text-white placeholder-slate-500 outline-none focus:border-emerald-500 font-medium">
+        </div>
+
+        <!-- Prominent Send Action Button -->
+        <button id="btn-send" type="button" class="btn-tactile w-full py-2.5 px-4 rounded-xl font-extrabold text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>Send to Desktop &amp; Start Smart Fill ➔</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- SUCCESS SCREEN (Shown after delivery) -->
+    <div id="success-zone" class="hidden flex-1 min-h-0 w-full rounded-2xl border border-emerald-500/40 bg-emerald-950/30 flex flex-col items-center justify-center p-6 text-center space-y-4">
+      <div class="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 text-emerald-400 flex items-center justify-center text-3xl font-bold shadow-lg shadow-emerald-500/20">
+        ✓
+      </div>
+      <div class="space-y-1">
+        <h3 class="text-base font-black text-white">Delivered to Desktop!</h3>
+        <p class="text-xs text-emerald-300">
+          Document photo received on TradeFlow screen.
+        </p>
+        <p class="text-[11px] text-emerald-400 font-mono font-bold pt-1">
+          ⚡ Smart Fill Assistant Launched &amp; Analyzing
+        </p>
+      </div>
+
+      <button id="btn-snap-again" type="button" class="btn-tactile w-full max-w-xs py-3 px-4 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center justify-center gap-2 mt-2">
+        <i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i>
+        <span>Snap Another Document</span>
+      </button>
+    </div>
+
+    <!-- Interactive Mobile Touch Crop Modal Overlay -->
+    <div id="crop-modal" class="hidden fixed inset-0 z-50 bg-slate-950 flex flex-col p-2.5 select-none">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
+        <div class="flex items-center gap-2">
+          <i data-lucide="crop" class="w-4 h-4 text-emerald-400"></i>
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Crop Slip / Document</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-crop-cancel" type="button" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800 text-slate-300 font-semibold border border-slate-700">Cancel</button>
+          <button id="btn-crop-apply" type="button" class="btn-tactile px-3 py-1 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1 shadow-md">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span>Apply Crop</span>
+          </button>
+        </div>
+      </div>
+      <div class="text-[11px] text-slate-400 py-1 text-center shrink-0">
+        Drag the corners to frame only the payment slip / document:
+      </div>
+      <!-- Crop Canvas Viewport -->
+      <div id="crop-container" class="relative flex-1 min-h-0 overflow-hidden flex items-center justify-center bg-black/70 rounded-xl border border-slate-800 touch-none">
+        <canvas id="crop-canvas" class="max-w-full max-h-full object-contain"></canvas>
+        <div id="crop-box" class="absolute border-2 border-emerald-400 bg-emerald-500/10 cursor-move pointer-events-auto touch-none shadow-[0_0_0_9999px_rgba(0,0,0,0.65)]">
+          <!-- 4 Corner Touch Handles -->
+          <div class="crop-handle absolute -top-3.5 -left-3.5 w-7 h-7 bg-emerald-400 border-2 border-white rounded-full shadow-lg touch-none" data-handle="tl"></div>
+          <div class="crop-handle absolute -top-3.5 -right-3.5 w-7 h-7 bg-emerald-400 border-2 border-white rounded-full shadow-lg touch-none" data-handle="tr"></div>
+          <div class="crop-handle absolute -bottom-3.5 -left-3.5 w-7 h-7 bg-emerald-400 border-2 border-white rounded-full shadow-lg touch-none" data-handle="bl"></div>
+          <div class="crop-handle absolute -bottom-3.5 -right-3.5 w-7 h-7 bg-emerald-400 border-2 border-white rounded-full shadow-lg touch-none" data-handle="br"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Initialize Lucide Icons
+    if (window.lucide) lucide.createIcons();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDirect = urlParams.get('mode') === 'direct' || !urlParams.get('session');
+    
+    // Persistent device identity stored in phone localStorage
+    let deviceId = localStorage.getItem('tf_device_id');
+    if (!deviceId) {
+      deviceId = 'DEV-' + Math.floor(1000 + Math.random() * 9000);
+      localStorage.setItem('tf_device_id', deviceId);
+    }
+
+    const sessionId = urlParams.get('session') || deviceId;
+    const badgeEl = document.getElementById('session-badge');
+    if (badgeEl) {
+      if (isDirect) {
+        badgeEl.innerHTML = '<span class="text-emerald-400 font-black">SHORTCUT</span> • PAIRED';
+      } else {
+        badgeEl.innerText = sessionId.length > 20 ? 'PAIRED-' + sessionId.slice(-6).toUpperCase() : sessionId;
+      }
+    }
+
+    let capturedFile = null;
+    let capturedBase64 = null;
+    let originalRawFile = null;
+    let selectedTag = 'bank_slip';
+
+    const cameraInput = document.getElementById('camera-input');
+    const galleryInput = document.getElementById('gallery-input');
+    const captureZone = document.getElementById('capture-zone');
+    const previewZone = document.getElementById('preview-zone');
+    const successZone = document.getElementById('success-zone');
+    const errorBanner = document.getElementById('error-banner');
+    const errorText = document.getElementById('error-text');
+
+    // Cropper State
+    const cropModal = document.getElementById('crop-modal');
+    const cropCanvas = document.getElementById('crop-canvas');
+    const cropBox = document.getElementById('crop-box');
+    const cropContainer = document.getElementById('crop-container');
+    let cropImg = new Image();
+    let cropCanvasScale = 1;
+    let cropBoxRect = { x: 0, y: 0, w: 100, h: 100 };
+    let isDraggingBox = false;
+    let activeHandle = null;
+    let dragStart = { x: 0, y: 0, boxX: 0, boxY: 0, boxW: 0, boxH: 0 };
+
+    document.getElementById('btn-camera').addEventListener('click', () => cameraInput.click());
+    document.getElementById('btn-gallery').addEventListener('click', () => galleryInput.click());
+    document.getElementById('btn-retake').addEventListener('click', () => {
+      previewZone.classList.add('hidden');
+      captureZone.classList.remove('hidden');
+      capturedFile = null;
+      capturedBase64 = null;
+      originalRawFile = null;
+      if (window.lucide) lucide.createIcons();
+    });
+
+    document.getElementById('btn-snap-again').addEventListener('click', () => {
+      successZone.classList.add('hidden');
+      previewZone.classList.add('hidden');
+      captureZone.classList.remove('hidden');
+      capturedFile = null;
+      capturedBase64 = null;
+      originalRawFile = null;
+      if (window.lucide) lucide.createIcons();
+    });
+
+    // Tag button selection
+    document.querySelectorAll('.tag-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tag-btn').forEach(b => {
+          b.className = 'tag-btn py-1.5 px-2 rounded-xl border border-slate-700/80 bg-slate-900 text-slate-300 font-semibold flex items-center justify-center gap-1';
+        });
+        btn.className = 'tag-btn py-1.5 px-2 rounded-xl border border-emerald-500 bg-emerald-500/20 text-emerald-300 font-bold flex items-center justify-center gap-1 shadow-xs';
+        selectedTag = btn.dataset.tag;
+      });
+    });
+
+    // Client-side image compression: downscale max 1800px at 0.85 JPEG (~280 KB vs 5.7 MB)
+    function compressImage(source, maxDimension = 1800, quality = 0.85) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.naturalWidth || img.width;
+          let h = img.naturalHeight || img.height;
+          if (w > maxDimension || h > maxDimension) {
+            if (w > h) {
+              h = Math.round((h * maxDimension) / w);
+              w = maxDimension;
+            } else {
+              w = Math.round((w * maxDimension) / h);
+              h = maxDimension;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          const sizeBytes = Math.round((dataUrl.length - 23) * 3 / 4);
+          resolve({ dataUrl, width: w, height: h, sizeBytes, canvas });
+        };
+        img.onerror = reject;
+        if (typeof source === 'string') {
+          img.src = source;
+        } else {
+          const reader = new FileReader();
+          reader.onload = (e) => { img.src = e.target.result; };
+          reader.readAsDataURL(source);
+        }
+      });
+    }
+
+    async function processSelectedFile(file) {
+      if (!file) return;
+      originalRawFile = file;
+      capturedFile = file;
+
+      try {
+        const origSizeKb = Math.round(file.size / 1024);
+        const compressed = await compressImage(file, 1800, 0.85);
+        capturedBase64 = compressed.dataUrl;
+
+        const previewImg = document.getElementById('preview-img');
+        previewImg.src = capturedBase64;
+        document.getElementById('preview-filename').innerText = file.name || 'slip.jpg';
+
+        const optSizeKb = Math.round(compressed.sizeBytes / 1024);
+        const badge = optSizeKb < origSizeKb 
+          ? `${optSizeKb} KB (${(origSizeKb/1024).toFixed(1)} MB)`
+          : `${optSizeKb} KB`;
+        document.getElementById('preview-size').innerText = badge;
+
+        captureZone.classList.add('hidden');
+        previewZone.classList.remove('hidden');
+        if (errorBanner) errorBanner.classList.add('hidden');
+        if (window.lucide) lucide.createIcons();
+      } catch (err) {
+        console.error('Image compression error:', err);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          capturedBase64 = e.target.result;
+          document.getElementById('preview-img').src = capturedBase64;
+          document.getElementById('preview-filename').innerText = file.name || 'slip.jpg';
+          document.getElementById('preview-size').innerText = Math.round(file.size / 1024) + ' KB';
+          captureZone.classList.add('hidden');
+          previewZone.classList.remove('hidden');
+          if (window.lucide) lucide.createIcons();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    cameraInput.addEventListener('change', (e) => processSelectedFile(e.target.files[0]));
+    galleryInput.addEventListener('change', (e) => processSelectedFile(e.target.files[0]));
+
+    // Rotate 90° Clockwise
+    document.getElementById('btn-rotate').addEventListener('click', async () => {
+      if (!capturedBase64) return;
+      const btn = document.getElementById('btn-rotate');
+      btn.disabled = true;
+
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.height;
+        canvas.height = img.width;
+        const ctx = canvas.getContext('2d');
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((90 * Math.PI) / 180);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        capturedBase64 = dataUrl;
+        document.getElementById('preview-img').src = dataUrl;
+        const optSizeKb = Math.round((dataUrl.length - 23) * 3 / 4 / 1024);
+        document.getElementById('preview-size').innerText = `${optSizeKb} KB (90°)`;
+        btn.disabled = false;
+      };
+      img.src = capturedBase64;
+    });
+
+    // Touch Cropper Modal Handlers
+    document.getElementById('btn-crop-slip').addEventListener('click', () => {
+      if (!capturedBase64) return;
+      openCropModal();
+    });
+
+    document.getElementById('btn-crop-cancel').addEventListener('click', () => {
+      cropModal.classList.add('hidden');
+    });
+
+    function openCropModal() {
+      cropModal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+
+      cropImg = new Image();
+      cropImg.onload = () => {
+        const contW = cropContainer.clientWidth || 340;
+        const contH = cropContainer.clientHeight || 450;
+        const imgW = cropImg.naturalWidth;
+        const imgH = cropImg.naturalHeight;
+
+        const scale = Math.min(contW / imgW, contH / imgH);
+        cropCanvasScale = scale;
+        const displayW = Math.round(imgW * scale);
+        const displayH = Math.round(imgH * scale);
+
+        cropCanvas.width = imgW;
+        cropCanvas.height = imgH;
+        cropCanvas.style.width = displayW + 'px';
+        cropCanvas.style.height = displayH + 'px';
+
+        const ctx = cropCanvas.getContext('2d');
+        ctx.drawImage(cropImg, 0, 0);
+
+        const cLeft = Math.round((contW - displayW) / 2);
+        const cTop = Math.round((contH - displayH) / 2);
+        cropCanvas.style.position = 'absolute';
+        cropCanvas.style.left = cLeft + 'px';
+        cropCanvas.style.top = cTop + 'px';
+
+        const padX = Math.round(displayW * 0.08);
+        const padY = Math.round(displayH * 0.08);
+        cropBoxRect = {
+          x: cLeft + padX,
+          y: cTop + padY,
+          w: Math.max(100, displayW - (padX * 2)),
+          h: Math.max(100, displayH - (padY * 2)),
+          cLeft, cTop, displayW, displayH
+        };
+        updateCropBoxUI();
+      };
+      cropImg.src = capturedBase64;
+    }
+
+    function updateCropBoxUI() {
+      cropBox.style.left = cropBoxRect.x + 'px';
+      cropBox.style.top = cropBoxRect.y + 'px';
+      cropBox.style.width = cropBoxRect.w + 'px';
+      cropBox.style.height = cropBoxRect.h + 'px';
+    }
+
+    function getPointerPos(e) {
+      if (e.touches && e.touches.length > 0) {
+        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+      return { x: e.clientX, y: e.clientY };
+    }
+
+    function onDragStart(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const pos = getPointerPos(e);
+      const target = e.target;
+      activeHandle = target.dataset?.handle || null;
+      isDraggingBox = !activeHandle;
+
+      dragStart = {
+        x: pos.x,
+        y: pos.y,
+        boxX: cropBoxRect.x,
+        boxY: cropBoxRect.y,
+        boxW: cropBoxRect.w,
+        boxH: cropBoxRect.h
+      };
+
+      window.addEventListener('mousemove', onDragMove, { passive: false });
+      window.addEventListener('mouseup', onDragEnd);
+      window.addEventListener('touchmove', onDragMove, { passive: false });
+      window.addEventListener('touchend', onDragEnd);
+    }
+
+    function onDragMove(e) {
+      if (!isDraggingBox && !activeHandle) return;
+      e.preventDefault();
+      const pos = getPointerPos(e);
+      const dx = pos.x - dragStart.x;
+      const dy = pos.y - dragStart.y;
+      const { cLeft, cTop, displayW, displayH } = cropBoxRect;
+
+      const minW = 60, minH = 60;
+      const minX = cLeft, maxX = cLeft + displayW;
+      const minY = cTop, maxY = cTop + displayH;
+
+      if (isDraggingBox) {
+        let newX = dragStart.boxX + dx;
+        let newY = dragStart.boxY + dy;
+        newX = Math.max(minX, Math.min(newX, maxX - cropBoxRect.w));
+        newY = Math.max(minY, Math.min(newY, maxY - cropBoxRect.h));
+        cropBoxRect.x = newX;
+        cropBoxRect.y = newY;
+      } else if (activeHandle === 'tl') {
+        let newX = Math.min(dragStart.boxX + dx, dragStart.boxX + dragStart.boxW - minW);
+        let newY = Math.min(dragStart.boxY + dy, dragStart.boxY + dragStart.boxH - minH);
+        newX = Math.max(minX, newX);
+        newY = Math.max(minY, newY);
+        cropBoxRect.w = (dragStart.boxX + dragStart.boxW) - newX;
+        cropBoxRect.h = (dragStart.boxY + dragStart.boxH) - newY;
+        cropBoxRect.x = newX;
+        cropBoxRect.y = newY;
+      } else if (activeHandle === 'tr') {
+        let newW = Math.max(minW, dragStart.boxW + dx);
+        let newY = Math.min(dragStart.boxY + dy, dragStart.boxY + dragStart.boxH - minH);
+        newW = Math.min(newW, maxX - dragStart.boxX);
+        newY = Math.max(minY, newY);
+        cropBoxRect.w = newW;
+        cropBoxRect.h = (dragStart.boxY + dragStart.boxH) - newY;
+        cropBoxRect.y = newY;
+      } else if (activeHandle === 'bl') {
+        let newX = Math.min(dragStart.boxX + dx, dragStart.boxX + dragStart.boxW - minW);
+        let newH = Math.max(minH, dragStart.boxH + dy);
+        newX = Math.max(minX, newX);
+        newH = Math.min(newH, maxY - dragStart.boxY);
+        cropBoxRect.w = (dragStart.boxX + dragStart.boxW) - newX;
+        cropBoxRect.x = newX;
+        cropBoxRect.h = newH;
+      } else if (activeHandle === 'br') {
+        let newW = Math.max(minW, dragStart.boxW + dx);
+        let newH = Math.max(minH, dragStart.boxH + dy);
+        newW = Math.min(newW, maxX - dragStart.boxX);
+        newH = Math.min(newH, maxY - dragStart.boxY);
+        cropBoxRect.w = newW;
+        cropBoxRect.h = newH;
+      }
+
+      updateCropBoxUI();
+    }
+
+    function onDragEnd() {
+      isDraggingBox = false;
+      activeHandle = null;
+      window.removeEventListener('mousemove', onDragMove);
+      window.removeEventListener('mouseup', onDragEnd);
+      window.removeEventListener('touchmove', onDragMove);
+      window.removeEventListener('touchend', onDragEnd);
+    }
+
+    cropBox.addEventListener('mousedown', onDragStart);
+    cropBox.addEventListener('touchstart', onDragStart, { passive: false });
+
+    // Apply Crop
+    document.getElementById('btn-crop-apply').addEventListener('click', async () => {
+      const { cLeft, cTop } = cropBoxRect;
+      const naturalScale = cropImg.naturalWidth / cropCanvas.clientWidth;
+      const relX = Math.max(0, (cropBoxRect.x - cLeft) * naturalScale);
+      const relY = Math.max(0, (cropBoxRect.y - cTop) * naturalScale);
+      const relW = Math.min(cropImg.naturalWidth - relX, cropBoxRect.w * naturalScale);
+      const relH = Math.min(cropImg.naturalHeight - relY, cropBoxRect.h * naturalScale);
+
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = Math.round(relW);
+      offCanvas.height = Math.round(relH);
+      const offCtx = offCanvas.getContext('2d');
+      offCtx.drawImage(cropImg, relX, relY, relW, relH, 0, 0, offCanvas.width, offCanvas.height);
+
+      const compressed = await compressImage(offCanvas.toDataURL('image/jpeg', 0.9), 1800, 0.85);
+      capturedBase64 = compressed.dataUrl;
+
+      document.getElementById('preview-img').src = capturedBase64;
+      const optSizeKb = Math.round(compressed.sizeBytes / 1024);
+      document.getElementById('preview-size').innerText = `${optSizeKb} KB (Cropped)`;
+      cropModal.classList.add('hidden');
+    });
+
+    // Send to desktop
+    document.getElementById('btn-send').addEventListener('click', async () => {
+      if (!capturedBase64) return;
+
+      const sendBtn = document.getElementById('btn-send');
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> <span>Sending to Desktop...</span>';
+
+      try {
+        const note = document.getElementById('upload-note').value;
+        const resp = await fetch('/api/mobile-snap/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: sessionId,
+            fileData: capturedBase64,
+            fileName: (originalRawFile && originalRawFile.name) || `snap_${Date.now()}.jpg`,
+            fileType: 'image/jpeg',
+            tag: selectedTag,
+            note: note
+          })
+        });
+
+        const data = await resp.json();
+        if (resp.ok && data.success) {
+          previewZone.classList.add('hidden');
+          successZone.classList.remove('hidden');
+          if (errorBanner) errorBanner.classList.add('hidden');
+          if (window.lucide) lucide.createIcons();
+        } else {
+          throw new Error(data.error || 'Server error while receiving photo');
+        }
+      } catch (err) {
+        if (errorText) errorText.innerText = 'Upload Error: ' + err.message;
+        if (errorBanner) errorBanner.classList.remove('hidden');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i> <span>Send to Desktop &amp; Start Smart Fill ➔</span>';
+        if (window.lucide) lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>
